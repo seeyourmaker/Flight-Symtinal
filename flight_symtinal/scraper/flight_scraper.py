@@ -1,8 +1,9 @@
-"""Playwright scraper for one fixed flight itinerary."""
+"""Playwright scraper for configured flight itineraries."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from urllib.parse import quote_plus
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
@@ -26,14 +27,15 @@ def parse_price(raw_text: str) -> int:
     return int(digits)
 
 
-def fetch_mumbai_guwahati_price() -> FlightResult:
-    """Open the fixed search page and try to read the first visible price."""
-    # This URL is a simple starting point for the fixed itinerary.
-    # In a later phase we can replace it with a stronger, site-specific flow.
-    search_url = (
-        "https://www.google.com/travel/flights?"
-        "q=Flights%20from%20Mumbai%20to%20Guwahati"
-    )
+def build_search_url(origin: str, destination: str, departure: str, return_date: str) -> str:
+    """Create a Google Flights search URL for one round trip."""
+    query = f"Flights from {origin} to {destination} {departure} {return_date}"
+    return f"https://www.google.com/travel/flights?q={quote_plus(query)}"
+
+
+def scrape_flight_price(origin: str, destination: str, departure: str, return_date: str) -> FlightResult:
+    """Open the search page and try to read the first visible price."""
+    search_url = build_search_url(origin, destination, departure, return_date)
 
     selectors_to_try = [
         "[aria-label*='₹']",
@@ -63,5 +65,5 @@ def fetch_mumbai_guwahati_price() -> FlightResult:
     if not price_text:
         raise RuntimeError("Could not find a visible price on the page.")
 
-    return FlightResult(route="Mumbai -> Guwahati", price=parse_price(price_text))
-
+    route_label = f"{origin} -> {destination} | {departure} -> {return_date}"
+    return FlightResult(route=route_label, price=parse_price(price_text))

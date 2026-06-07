@@ -1,0 +1,56 @@
+{
+  "routes": [
+    {
+      "name": "Mumbai to Guwahati",
+      "origin": "Mumbai",
+      "destination": "Guwahati",
+      "date_pairs": [
+        { "departure": "2026-07-01", "return": "2026-07-08" },
+        { "departure": "2026-09-01", "return": "2026-09-08" },
+        { "departure": "2026-10-01", "return": "2026-10-08" },
+        { "departure": "2026-07-25", "return": "2026-07-31" },
+        { "departure": "2026-09-24", "return": "2026-09-30" },
+        { "departure": "2026-10-24", "return": "2026-10-31" }
+      ]
+    },
+    {
+      "name": "Mumbai to Goa",
+      "origin": "Mumbai",
+      "destination": "Goa",
+      "date_pairs": [
+        { "departure": "2026-07-01", "return": "2026-07-08" },
+        { "departure": "2026-09-01", "return": "2026-09-08" },
+        { "departure": "2026-10-01", "return": "2026-10-08" },
+        { "departure": "2026-07-25", "return": "2026-07-31" },
+        { "departure": "2026-09-24", "return": "2026-09-30" },
+        { "departure": "2026-10-24", "return": "2026-10-31" }
+      ]
+    },
+    {
+      "name": "Mumbai to Bangkok",
+      "origin": "Mumbai",
+      "destination": "Bangkok",
+      "date_pairs": [
+        { "departure": "2026-07-01", "return": "2026-07-08" },
+        { "departure": "2026-09-01", "return": "2026-09-08" },
+        { "departure": "2026-10-01", "return": "2026-10-08" },
+        { "departure": "2026-07-25", "return": "2026-07-31" },
+        { "departure": "2026-09-24", "return": "2026-09-30" },
+        { "departure": "2026-10-24", "return": "2026-10-31" }
+      ]
+    },
+    {
+      "name": "Mumbai to Bangalore",
+      "origin": "Mumbai",
+      "destination": "Bangalore",
+      "date_pairs": [
+        { "departure": "2026-07-01", "return": "2026-07-08" },
+        { "departure": "2026-09-01", "return": "2026-09-08" },
+        { "departure": "2026-10-01", "return": "2026-10-08" },
+        { "departure": "2026-07-25", "return": "2026-07-31" },
+        { "departure": "2026-09-24", "return": "2026-09-30" },
+        { "departure": "2026-10-24", "return": "2026-10-31" }
+      ]
+    }
+  ]
+}
