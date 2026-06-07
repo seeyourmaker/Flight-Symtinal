@@ -6,6 +6,7 @@ import json
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -14,6 +15,7 @@ class DatePair:
 
     departure: str
     return_date: str
+    target_price: int | None = None
 
 
 @dataclass(frozen=True)
@@ -26,24 +28,57 @@ class RouteConfig:
     date_pairs: list[DatePair]
 
 
-def load_route_config(config_path: Path) -> list[RouteConfig]:
+@dataclass(frozen=True)
+class AlertSettings:
+    """Global alert settings loaded from the JSON config."""
+
+    significant_drop_percent: int = 10
+
+
+@dataclass(frozen=True)
+class RouteFileConfig:
+    """Parsed contents of the route configuration file."""
+
+    routes: list[RouteConfig]
+    alert_settings: AlertSettings
+
+
+def load_route_config(config_path: Path) -> RouteFileConfig:
     """Load the JSON config file and validate its contents."""
     if not config_path.exists():
         raise FileNotFoundError(f"Route config file not found: {config_path}")
 
     with config_path.open("r", encoding="utf-8") as file:
-        raw = json.load(file)
+        raw: dict[str, Any] = json.load(file)
 
     routes = raw.get("routes")
     if not isinstance(routes, list) or not routes:
         raise ValueError("Config must contain a non-empty 'routes' list.")
 
+    alert_settings = _parse_alert_settings(raw.get("alert_settings"))
     parsed_routes: list[RouteConfig] = []
 
     for index, item in enumerate(routes, start=1):
         parsed_routes.append(_parse_route(item, index))
 
-    return parsed_routes
+    return RouteFileConfig(routes=parsed_routes, alert_settings=alert_settings)
+
+
+def _parse_alert_settings(item: object) -> AlertSettings:
+    """Read optional alert settings from the config file."""
+    if item is None:
+        return AlertSettings()
+
+    if not isinstance(item, dict):
+        raise ValueError("'alert_settings' must be a JSON object.")
+
+    value = item.get("significant_drop_percent", 10)
+    if not isinstance(value, int) or value <= 0 or value >= 100:
+        raise ValueError(
+            "'significant_drop_percent' must be an integer between 1 and 99."
+        )
+
+    return AlertSettings(significant_drop_percent=value)
 
 
 def _parse_route(item: object, index: int) -> RouteConfig:
@@ -61,7 +96,10 @@ def _parse_route(item: object, index: int) -> RouteConfig:
             f"Route '{name}' must contain at least 5 date_pairs entries."
         )
 
-    date_pairs = [_parse_date_pair(pair, name, pair_index) for pair_index, pair in enumerate(date_pairs_raw, start=1)]
+    date_pairs = [
+        _parse_date_pair(pair, name, pair_index)
+        for pair_index, pair in enumerate(date_pairs_raw, start=1)
+    ]
 
     return RouteConfig(
         name=name,
@@ -78,13 +116,23 @@ def _parse_date_pair(item: object, route_name: str, index: int) -> DatePair:
 
     departure = _require_date(item, "departure", route_name, index)
     return_date = _require_date(item, "return", route_name, index)
+    target_price = item.get("target_price")
+    if target_price is not None and (not isinstance(target_price, int) or target_price <= 0):
+        raise ValueError(
+            f"Route '{route_name}' date pair #{index} has invalid 'target_price'. "
+            "Use a positive integer or omit the field."
+        )
 
     if return_date <= departure:
         raise ValueError(
             f"Route '{route_name}' date pair #{index} has return date before departure date."
         )
 
-    return DatePair(departure=departure.isoformat(), return_date=return_date.isoformat())
+    return DatePair(
+        departure=departure.isoformat(),
+        return_date=return_date.isoformat(),
+        target_price=target_price,
+    )
 
 
 def _require_text(item: dict[str, object], key: str, index: int) -> str:
@@ -113,4 +161,3 @@ def _require_date(
             f"Route '{route_name}' date pair #{index} has invalid '{key}' date: {value!r}. "
             "Use YYYY-MM-DD."
         ) from exc
-

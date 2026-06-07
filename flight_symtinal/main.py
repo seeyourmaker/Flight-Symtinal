@@ -3,6 +3,7 @@
 import sys
 
 from flight_symtinal.alerts.telegram_bot import build_summary_message, send_telegram_message
+from flight_symtinal.alerts.telegram_commands import run_telegram_polling
 from flight_symtinal.config import BASE_DIR, PRICES_CSV, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from flight_symtinal.core.analytics import format_summary, load_price_history, summarize_prices
 from flight_symtinal.route_config import load_route_config
@@ -25,8 +26,22 @@ def main() -> None:
         print("Telegram test message sent.")
         return
 
-    routes = load_route_config(ROUTE_CONFIG_PATH)
-    run_tracking(routes, PRICES_CSV)
+    route_file_config = load_route_config(ROUTE_CONFIG_PATH)
+
+    if command == "telegram-poll":
+        run_telegram_polling(
+            bot_token=TELEGRAM_BOT_TOKEN,
+            chat_id=TELEGRAM_CHAT_ID,
+            csv_path=PRICES_CSV,
+            route_config=route_file_config,
+        )
+        return
+
+    run_tracking(
+        route_file_config.routes,
+        PRICES_CSV,
+        route_file_config.alert_settings.significant_drop_percent,
+    )
 
     records = load_price_history(PRICES_CSV)
     if not records:

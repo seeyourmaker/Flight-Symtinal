@@ -1,16 +1,19 @@
 {
+  "alert_settings": {
+    "significant_drop_percent": 10
+  },
   "routes": [
     {
       "name": "Mumbai to Guwahati",
       "origin": "Mumbai",
       "destination": "Guwahati",
       "date_pairs": [
-        { "departure": "2026-07-01", "return": "2026-07-08" },
-        { "departure": "2026-09-01", "return": "2026-09-08" },
-        { "departure": "2026-10-01", "return": "2026-10-08" },
-        { "departure": "2026-07-25", "return": "2026-07-31" },
-        { "departure": "2026-09-24", "return": "2026-09-30" },
-        { "departure": "2026-10-24", "return": "2026-10-31" }
+        { "departure": "2026-07-01", "return": "2026-07-08", "target_price": 14500 },
+        { "departure": "2026-09-01", "return": "2026-09-08", "target_price": 15000 },
+        { "departure": "2026-10-01", "return": "2026-10-08", "target_price": 15500 },
+        { "departure": "2026-07-25", "return": "2026-07-31", "target_price": 14000 },
+        { "departure": "2026-09-24", "return": "2026-09-30", "target_price": 14800 },
+        { "departure": "2026-10-24", "return": "2026-10-31", "target_price": 15200 }
       ]
     },
     {
@@ -18,12 +21,12 @@
       "origin": "Mumbai",
       "destination": "Goa",
       "date_pairs": [
-        { "departure": "2026-07-01", "return": "2026-07-08" },
-        { "departure": "2026-09-01", "return": "2026-09-08" },
-        { "departure": "2026-10-01", "return": "2026-10-08" },
-        { "departure": "2026-07-25", "return": "2026-07-31" },
-        { "departure": "2026-09-24", "return": "2026-09-30" },
-        { "departure": "2026-10-24", "return": "2026-10-31" }
+        { "departure": "2026-07-01", "return": "2026-07-08", "target_price": 4500 },
+        { "departure": "2026-09-01", "return": "2026-09-08", "target_price": 5000 },
+        { "departure": "2026-10-01", "return": "2026-10-08", "target_price": 5200 },
+        { "departure": "2026-07-25", "return": "2026-07-31", "target_price": 4300 },
+        { "departure": "2026-09-24", "return": "2026-09-30", "target_price": 4900 },
+        { "departure": "2026-10-24", "return": "2026-10-31", "target_price": 5100 }
       ]
     },
     {
@@ -31,12 +34,12 @@
       "origin": "Mumbai",
       "destination": "Bangkok",
       "date_pairs": [
-        { "departure": "2026-07-01", "return": "2026-07-08" },
-        { "departure": "2026-09-01", "return": "2026-09-08" },
-        { "departure": "2026-10-01", "return": "2026-10-08" },
-        { "departure": "2026-07-25", "return": "2026-07-31" },
-        { "departure": "2026-09-24", "return": "2026-09-30" },
-        { "departure": "2026-10-24", "return": "2026-10-31" }
+        { "departure": "2026-07-01", "return": "2026-07-08", "target_price": 24000 },
+        { "departure": "2026-09-01", "return": "2026-09-08", "target_price": 25000 },
+        { "departure": "2026-10-01", "return": "2026-10-08", "target_price": 25500 },
+        { "departure": "2026-07-25", "return": "2026-07-31", "target_price": 23500 },
+        { "departure": "2026-09-24", "return": "2026-09-30", "target_price": 24500 },
+        { "departure": "2026-10-24", "return": "2026-10-31", "target_price": 25200 }
       ]
     },
     {
@@ -44,12 +47,12 @@
       "origin": "Mumbai",
       "destination": "Bangalore",
       "date_pairs": [
-        { "departure": "2026-07-01", "return": "2026-07-08" },
-        { "departure": "2026-09-01", "return": "2026-09-08" },
-        { "departure": "2026-10-01", "return": "2026-10-08" },
-        { "departure": "2026-07-25", "return": "2026-07-31" },
-        { "departure": "2026-09-24", "return": "2026-09-30" },
-        { "departure": "2026-10-24", "return": "2026-10-31" }
+        { "departure": "2026-07-01", "return": "2026-07-08", "target_price": 8000 },
+        { "departure": "2026-09-01", "return": "2026-09-08", "target_price": 8500 },
+        { "departure": "2026-10-01", "return": "2026-10-08", "target_price": 8800 },
+        { "departure": "2026-07-25", "return": "2026-07-31", "target_price": 7800 },
+        { "departure": "2026-09-24", "return": "2026-09-30", "target_price": 8300 },
+        { "departure": "2026-10-24", "return": "2026-10-31", "target_price": 8600 }
       ]
     }
   ]
