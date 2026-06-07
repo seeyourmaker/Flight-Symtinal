@@ -9,6 +9,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from flight_symtinal.ai.advisor import BuyAdvice, RuleBasedAdviceProvider
 from flight_symtinal.alerts.telegram_bot import send_telegram_message
 from flight_symtinal.core.analytics import (
     build_route_snapshots,
@@ -28,8 +29,13 @@ def run_telegram_polling(
     poll_interval_seconds: int = 30,
 ) -> None:
     """Poll Telegram for incoming commands and respond in chat."""
+    bot_token = bot_token.strip()
+    chat_id = chat_id.strip()
+
     if not bot_token:
         raise ValueError("TELEGRAM_BOT_TOKEN is missing.")
+    if not chat_id:
+        raise ValueError("TELEGRAM_CHAT_ID is missing.")
 
     offset = 0
 
@@ -42,7 +48,7 @@ def run_telegram_polling(
             text = (message.get("text") or "").strip()
             incoming_chat_id = str(message.get("chat", {}).get("id", ""))
 
-            if incoming_chat_id != str(chat_id):
+            if incoming_chat_id != chat_id:
                 continue
 
             if not text.startswith("/"):
@@ -82,6 +88,9 @@ def handle_command(command_text: str, csv_path: Path, route_config: RouteFileCon
     if command == "/route":
         return _route_text(route_name, route_config, records)
 
+    if command == "/shouldibuy":
+        return _should_i_buy_text(route_name, route_config, snapshots)
+
     return "Unknown command. Send /help for available commands."
 
 
@@ -95,7 +104,8 @@ def _help_text() -> str:
         "/lowest - lowest recorded fare for every route/date pair\n"
         "/targets - show configured target prices\n"
         "/status - show system status\n"
-        "/route <name> - show details for one route"
+        "/route <name> - show details for one route\n"
+        "/shouldibuy <route> - get a buy/wait/monitor recommendation"
     )
 
 
@@ -177,6 +187,30 @@ def _route_text(route_name: str, route_config: RouteFileConfig, records) -> str:
     )
 
 
+def _should_i_buy_text(route_name: str, route_config: RouteFileConfig, snapshots) -> str:
+    """Return a recommendation for one route using existing analytics."""
+    if not route_name:
+        return "Use /shouldibuy <route>. Example: /shouldibuy Mumbai to Goa"
+
+    selected = next(
+        (route for route in route_config.routes if route.name.lower() == route_name.lower()),
+        None,
+    )
+    if selected is None:
+        return f"Route not found: {route_name}"
+
+    route_snapshots = [snapshot for snapshot in snapshots if snapshot.route.startswith(selected.name)]
+    if not route_snapshots:
+        return f"No price history yet for {selected.name}."
+
+    snapshot = max(route_snapshots, key=lambda item: item.last_seen)
+    target_price = _find_target_price(selected, snapshot.route)
+
+    provider = RuleBasedAdviceProvider()
+    advice = provider.recommend(snapshot, target_price)
+    return _format_advice(selected.name, snapshot.route, snapshot, target_price, advice)
+
+
 def _get_updates(bot_token: str, offset: int) -> list[dict]:
     """Fetch pending Telegram updates using long polling."""
     url = f"https://api.telegram.org/bot{bot_token}/getUpdates"
@@ -201,3 +235,35 @@ def _get_updates(bot_token: str, offset: int) -> list[dict]:
         raise RuntimeError(f"Telegram API returned an error: {data}")
 
     return data.get("result", [])
+
+
+def _find_target_price(route, route_label: str) -> int | None:
+    """Find the configured target price for a specific itinerary."""
+    for date_pair in route.date_pairs:
+        label = f"{route.name} | {date_pair.departure} -> {date_pair.return_date}"
+        if label == route_label:
+            return date_pair.target_price
+    return None
+
+
+def _format_advice(
+    route_name: str,
+    route_label: str,
+    snapshot,
+    target_price: int | None,
+    advice: BuyAdvice,
+) -> str:
+    """Render a concise buy/wait/monitor answer."""
+    target_text = str(target_price) if target_price is not None else "not set"
+    return (
+        f"{route_name}\n"
+        f"Route: {route_label}\n"
+        f"Recommendation: {advice.recommendation}\n"
+        f"Reason: {advice.reasoning}\n"
+        f"Current: {snapshot.current_price}\n"
+        f"Lowest: {snapshot.lowest_price}\n"
+        f"Highest: {snapshot.highest_price}\n"
+        f"Average: {snapshot.average_price:.2f}\n"
+        f"Observations: {snapshot.observations}\n"
+        f"Target: {target_text}"
+    )

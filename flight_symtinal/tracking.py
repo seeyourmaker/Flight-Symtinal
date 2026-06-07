@@ -13,7 +13,12 @@ from flight_symtinal.alerts.alert_manager import (
     save_alert_state,
 )
 from flight_symtinal.alerts.telegram_bot import send_telegram_message
-from flight_symtinal.config import ALERT_STATE_JSON, PRICES_CSV, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from flight_symtinal.config import (
+    ALERT_STATE_JSON,
+    PRICES_CSV,
+    get_telegram_bot_token,
+    get_telegram_chat_id,
+)
 from flight_symtinal.core.analytics import load_price_history
 from flight_symtinal.route_config import RouteConfig
 from flight_symtinal.scraper.flight_scraper import scrape_flight_price
@@ -101,6 +106,8 @@ def _send_route_alerts(
     significant_drop_percent: int,
 ) -> None:
     """Evaluate alerts, suppress duplicates, and send Telegram messages."""
+    bot_token = get_telegram_bot_token()
+    chat_id = get_telegram_chat_id()
     state = load_alert_state(ALERT_STATE_JSON)
     alerts = evaluate_alerts(
         route_label=route_label,
@@ -113,8 +120,8 @@ def _send_route_alerts(
 
     for alert in pending_alerts:
         send_telegram_message(
-            TELEGRAM_BOT_TOKEN,
-            TELEGRAM_CHAT_ID,
+            bot_token,
+            chat_id,
             alert.message,
         )
         record_sent_alert(state, alert)

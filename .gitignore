@@ -23,3 +23,6 @@ dist/
 # Project-generated data
 data/prices.csv
 data/alert_state.json
+
+# Local environment files
+.env

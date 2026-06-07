@@ -4,7 +4,12 @@ import sys
 
 from flight_symtinal.alerts.telegram_bot import build_summary_message, send_telegram_message
 from flight_symtinal.alerts.telegram_commands import run_telegram_polling
-from flight_symtinal.config import BASE_DIR, PRICES_CSV, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from flight_symtinal.config import (
+    BASE_DIR,
+    PRICES_CSV,
+    get_telegram_bot_token,
+    get_telegram_chat_id,
+)
 from flight_symtinal.core.analytics import format_summary, load_price_history, summarize_prices
 from flight_symtinal.route_config import load_route_config
 from flight_symtinal.tracking import run_tracking
@@ -16,11 +21,13 @@ ROUTE_CONFIG_PATH = BASE_DIR / "flight_symtinal" / "flight_routes.json"
 def main() -> None:
     """Run configured flight tracking, then print or send a summary."""
     command = sys.argv[1] if len(sys.argv) > 1 else "run"
+    bot_token = get_telegram_bot_token()
+    chat_id = get_telegram_chat_id()
 
     if command == "telegram-test":
         send_telegram_message(
-            TELEGRAM_BOT_TOKEN,
-            TELEGRAM_CHAT_ID,
+            bot_token,
+            chat_id,
             "Flight Symtinal test message.",
         )
         print("Telegram test message sent.")
@@ -30,8 +37,8 @@ def main() -> None:
 
     if command == "telegram-poll":
         run_telegram_polling(
-            bot_token=TELEGRAM_BOT_TOKEN,
-            chat_id=TELEGRAM_CHAT_ID,
+            bot_token=bot_token,
+            chat_id=chat_id,
             csv_path=PRICES_CSV,
             route_config=route_file_config,
         )
@@ -54,7 +61,7 @@ def main() -> None:
 
     if command == "telegram-summary":
         message = build_summary_message(route, summary_text)
-        send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, message)
+        send_telegram_message(bot_token, chat_id, message)
         print("Telegram summary sent.")
         return
 

@@ -40,6 +40,7 @@ class RoutePriceSnapshot:
     average_price: float
     observations: int
     last_seen: str
+    target_price: int | None = None
 
 
 def load_price_history(csv_path: Path) -> list[PriceRecord]:
@@ -94,7 +95,11 @@ def group_records_by_route(records: list[PriceRecord]) -> dict[str, list[PriceRe
     return dict(grouped)
 
 
-def summarize_route_records(route: str, records: list[PriceRecord]) -> RoutePriceSnapshot:
+def summarize_route_records(
+    route: str,
+    records: list[PriceRecord],
+    target_price: int | None = None,
+) -> RoutePriceSnapshot:
     """Calculate analytics for one route/date combination."""
     if not records:
         raise ValueError("No records available for route summary.")
@@ -110,6 +115,7 @@ def summarize_route_records(route: str, records: list[PriceRecord]) -> RoutePric
         average_price=sum(prices) / len(prices),
         observations=len(records),
         last_seen=latest_record.timestamp,
+        target_price=target_price,
     )
 
 
