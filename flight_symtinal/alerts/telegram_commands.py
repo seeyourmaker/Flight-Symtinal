@@ -9,7 +9,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from flight_symtinal.ai.advisor import BuyAdvice, RuleBasedAdviceProvider
+from flight_symtinal.ai.advisor import DecisionResult, RuleBasedAdviceProvider
 from flight_symtinal.alerts.telegram_bot import send_telegram_message
 from flight_symtinal.core.analytics import (
     build_route_snapshots,
@@ -251,19 +251,20 @@ def _format_advice(
     route_label: str,
     snapshot,
     target_price: int | None,
-    advice: BuyAdvice,
+    advice: DecisionResult,
 ) -> str:
     """Render a concise buy/wait/monitor answer."""
     target_text = str(target_price) if target_price is not None else "not set"
     return (
         f"{route_name}\n"
-        f"Route: {route_label}\n"
-        f"Recommendation: {advice.recommendation}\n"
-        f"Reason: {advice.reasoning}\n"
-        f"Current: {snapshot.current_price}\n"
-        f"Lowest: {snapshot.lowest_price}\n"
-        f"Highest: {snapshot.highest_price}\n"
-        f"Average: {snapshot.average_price:.2f}\n"
-        f"Observations: {snapshot.observations}\n"
+        f"Current Price: ₹{snapshot.current_price}\n"
+        f"Lowest Price: ₹{snapshot.lowest_price}\n"
+        f"Average Price: ₹{snapshot.average_price:.0f}\n\n"
+        f"Recommendation: {advice.recommendation}\n\n"
+        f"Reason:\n{advice.reasoning}\n\n"
+        f"Score: {advice.score}/100\n"
+        f"Distance from lowest: {advice.metrics.distance_from_low_pct:.1f}%\n"
+        f"Distance from average: {advice.metrics.distance_from_average_pct:.1f}%\n"
+        f"Observations: {advice.metrics.observations}\n"
         f"Target: {target_text}"
     )
