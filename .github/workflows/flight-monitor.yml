@@ -27,6 +27,22 @@ jobs:
           python -m pip install playwright
           python -m playwright install --with-deps chromium
 
+      - name: Check Telegram env
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+            echo "TELEGRAM_BOT_TOKEN is set"
+          else
+            echo "TELEGRAM_BOT_TOKEN is missing"
+            exit 1
+          fi
+
+          if [ -n "$TELEGRAM_CHAT_ID" ]; then
+            echo "TELEGRAM_CHAT_ID is set"
+          else
+            echo "TELEGRAM_CHAT_ID is missing"
+            exit 1
+          fi
+
       - name: Run monitoring summary
         run: |
           python -m flight_symtinal.main telegram-summary
